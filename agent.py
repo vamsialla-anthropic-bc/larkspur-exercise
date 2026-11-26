@@ -71,22 +71,35 @@ def run_agent(pnr: str, last_name: str, message: str) -> str:            # ‚úèÔ∏
     client, tracer = new_session()
     tools = tool_list()
     messages = [
-        {"role": "user", "content": f"PNR {pnr}, last name {last_name}. {message}"},
+        {"role": "user", "content": [{"type": "text", "text": f"PNR {pnr}, last name {last_name}. {message}"}]},
+    ]
+    # Cost lever: the stable part of the prompt goes first and is marked cacheable
+    # (tools + system are read from cache on every turn after the first). The
+    # clock changes every second, so it goes AFTER the cached part, fixed once per
+    # conversation, instead of at the very front where it broke every cache.
+    system = [
+        {"type": "text", "text": SYSTEM_PROMPT + TONE_ADDENDUM, "cache_control": {"type": "ephemeral"}},
+        {"type": "text", "text": runtime_preamble()},
     ]
 
-    response = client.messages.create(
-        model=MODEL, max_tokens=4096, system=runtime_preamble() + SYSTEM_PROMPT + TONE_ADDENDUM,
-        thinking={"type": "adaptive"}, tools=tools, messages=messages,
-    )
+    def ask():
+        # One more breakpoint on the newest message, so each turn reads the whole
+        # earlier conversation from cache instead of paying for it again.
+        last = messages[-1]
+        marked = list(last["content"][:-1]) + [dict(last["content"][-1], cache_control={"type": "ephemeral"})]
+        return client.messages.create(
+            model=MODEL, max_tokens=4096, system=system,
+            thinking={"type": "adaptive"}, tools=tools,
+            messages=messages[:-1] + [{"role": last["role"], "content": marked}],
+        )
+
+    response = ask()
 
     turns = 1
     while response.stop_reason == "tool_use" and turns < MAX_TOOL_CALLS:
         messages.append({"role": "assistant", "content": response.content})
         messages.append({"role": "user", "content": tool_results(response)})
-        response = client.messages.create(
-            model=MODEL, max_tokens=4096, system=runtime_preamble() + SYSTEM_PROMPT + TONE_ADDENDUM,
-            thinking={"type": "adaptive"}, tools=tools, messages=messages,
-        )
+        response = ask()
         turns += 1
 
     return text_of(response)
