@@ -9,6 +9,7 @@
     python3 run.py --all --trace         # every Stage 1 ticket type (step 1.4)
 
 --trace prints the wire: every API turn, the parameters you sent, the blocks
+
 that came back, the tools Claude picked, what each tool answered, and what it
 cost. Read it. The trace is the lesson. The answer is the by-product.
 
