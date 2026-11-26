@@ -6,7 +6,7 @@
     "get_flight_status",
     "check_policy",
     "search_alternatives",
-    "hold_seat"
+    "check_policy"
   ],
   "saw_thinking": true,
   "used_format": false,
@@ -14,11 +14,11 @@
   "streamed": false,
   "deltas_seen": 0,
   "tokens": {
-    "input": 21532,
-    "output": 1115,
+    "input": 23647,
+    "output": 1338,
     "cache_read": 0,
     "cache_write": 0
   },
   "cache_hit_ratio": null,
-  "elapsed": 14.0
+  "elapsed": 17.4
 }

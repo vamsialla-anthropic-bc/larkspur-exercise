@@ -16,7 +16,21 @@ from support import (MODEL, SYSTEM_PROMPT, call_local, execute_tool, mcp_client,
 
 MAX_TOOL_CALLS = 8  # Larkspur's own build capped the loop here; then a human takes over.
 
-TONE_ADDENDUM = ""                       # ✏️ Build 4, step 4.1, intelligence goal
+TONE_ADDENDUM = """
+
+ABUSE OR LEGAL THREATS. If the customer is abusive, or mentions a lawyer, legal action,
+suing or a complaint to a regulator: look up the booking, acknowledge the frustration in
+one sentence, and call escalate_to_human with a short summary. Then tell them a person
+will pick it up. Do not give an entitlements rundown, do not mention refunds, vouchers or
+compensation, and do not call issue_voucher. Promise nothing.
+
+PARTY SIZE AND SEATS. When the booking has more than one passenger, say the number of
+seats left on any flight you offer and compare it to the party size in plain words
+(for example "5 seats left, and there are 2 of you"). Offer only flights with enough
+seats for everyone. hold_seat holds the option for the whole booking, and its result
+carries no seat count, so never claim a specific number of seats is held. Say the
+option is held for the booking.
+"""                                      # ✏️ Build 4, step 4.1, intelligence goal
 EXTRA_TOOLS: List[Dict[str, Any]] = []   # ✏️ Build 2, step 2.1: schemas for the tools you add
 LOCAL_TOOLS: Dict[str, Any] = {}         # ✏️ Build 2, step 2.1: the functions behind them
 
